@@ -73,4 +73,6 @@ export class UsersResolver {
       return { ok: false, error };
     }
   }
+
+  // TODO: Delete User
 }
