@@ -9,6 +9,7 @@ import { UsersService } from './users.service';
 
 const mockRepository = () => ({
   findOne: jest.fn(),
+  findOneOrFail: jest.fn(),
   save: jest.fn(),
   create: jest.fn(),
 });
@@ -166,7 +167,23 @@ describe('UsersService', () => {
     });
   });
 
-  it.todo('findById');
+  describe('findById', () => {
+    const findByIdArgs = {
+      id: 1,
+    };
+    it('should find an existing user', async () => {
+      usersRepository.findOneOrFail.mockResolvedValue(findByIdArgs);
+      const result = await service.findById(findByIdArgs.id);
+      expect(result).toEqual({ ok: true, user: findByIdArgs });
+    });
+
+    it('should fail if user not found', async () => {
+      usersRepository.findOneOrFail.mockRejectedValue(new Error());
+      const result = await service.findById(findByIdArgs.id);
+      expect(result).toEqual({ ok: false, error: 'User Not Found' });
+    });
+  });
+
   it.todo('editProfile');
   it.todo('verifyEmail');
 });
