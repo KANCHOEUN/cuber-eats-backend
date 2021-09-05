@@ -184,6 +184,73 @@ describe('UsersService', () => {
     });
   });
 
-  it.todo('editProfile');
+  describe('editProfile', () => {
+    const newVerification = {
+      code: 'code',
+    };
+
+    it('should be change email', async () => {
+      const editProfileArgs = {
+        userId: 1,
+        input: { email: 'edit_email@email.com' },
+      };
+
+      const oldUser = {
+        email: 'test_email@email.com',
+        verified: true,
+      };
+      const newUser = {
+        email: editProfileArgs.input.email,
+        verified: false,
+      };
+
+      usersRepository.findOne.mockResolvedValue(oldUser);
+      verificationsRepository.create.mockReturnValue(newVerification);
+      verificationsRepository.save.mockResolvedValue(newVerification);
+
+      await service.editProfile(editProfileArgs.userId, editProfileArgs.input);
+      expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(usersRepository.findOne).toHaveBeenCalledWith(
+        editProfileArgs.userId,
+      );
+
+      expect(verificationsRepository.create).toHaveBeenCalledWith({
+        user: newUser,
+      });
+      expect(verificationsRepository.save).toHaveBeenCalledWith(
+        newVerification,
+      );
+
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(
+        newUser.email,
+        newVerification.code,
+      );
+    });
+
+    it('should change password', async () => {
+      const editProfileArgs = {
+        userId: 1,
+        input: { password: 'new_password' },
+      };
+
+      usersRepository.findOne.mockResolvedValue({ password: 'old_password' });
+      usersRepository.save.mockResolvedValue({ password: 'new_password' });
+
+      const result = await service.editProfile(
+        editProfileArgs.userId,
+        editProfileArgs.input,
+      );
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(editProfileArgs.input);
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('should fail on exception', async () => {
+      usersRepository.findOne.mockRejectedValue(new Error());
+      const result = await service.editProfile(1, { email: 'error-email' });
+      expect(result).toEqual({ ok: false, error: "Couldn't update profile." });
+    });
+  });
+
   it.todo('verifyEmail');
 });
