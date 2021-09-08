@@ -98,7 +98,6 @@ export class UsersService {
       await this.users.save(user);
       return { ok: true };
     } catch (error) {
-      console.log(error);
       return { ok: false, error: "Couldn't update profile." };
     }
   }
