@@ -10,6 +10,7 @@ import {
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
@@ -71,11 +72,18 @@ export class CategoryResolver {
 
   @ResolveField((type) => Int)
   restaurantCount(@Parent() category: Category): Promise<number> {
-    return this.restaurantService.countRestaurant(category);
+    return this.restaurantService.countRestaurants(category);
   }
 
   @Query((returns) => GetCategoriesOutput)
   getCategories(): Promise<GetCategoriesOutput> {
     return this.restaurantService.getCategories();
+  }
+
+  @Query((returns) => CategoryOutput)
+  category(
+    @Args('input') categoryInput: CategoryInput,
+  ): Promise<CategoryOutput> {
+    return this.restaurantService.findCategoryBySlug(categoryInput);
   }
 }
